@@ -1,0 +1,188 @@
+openapi: 3.0.0
+info:
+  title: Todo Backend API
+  description: RESTful API for managing users and todos
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /signup:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Signup successful
+        '400':
+          description: Username already taken
+        '500':
+          description: Internal Server Error
+  /login:
+    post:
+      summary: Log in an existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid username or password
+        '500':
+          description: Internal Server Error
+  /todos/create:
+    post:
+      summary: Create a new todo
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                timestamp:
+                  type: string
+                notification:
+                  type: boolean
+                timeToRemind:
+                  type: string
+                todoType:
+                  type: string
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  todo:
+                    $ref: '#/components/schemas/Todo'
+        '500':
+          description: Internal Server Error
+  /todos/getAll:
+    get:
+      summary: Get all todos
+      security:
+        - JWT: []
+      responses:
+        '200':
+          description: List of todos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Todo'
+        '500':
+          description: Internal Server Error
+  /todos/update/{id}:
+    put:
+      summary: Update an existing todo
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  todo:
+                    $ref: '#/components/schemas/Todo'
+        '404':
+          description: Todo not found
+        '500':
+          description: Internal Server Error
+  /todos/delete/{id}:
+    delete:
+      summary: Delete a todo by ID
+      security:
+        - JWT: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Todo deleted successfully
+        '404':
+          description: Todo not found
+        '500':
+          description: Internal Server Error
+components:
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        timestamp:
+          type: string
+        notification:
+          type: boolean
+        timeToRemind:
+          type: string
+        todoType:
+          type: string
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
